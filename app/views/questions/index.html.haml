@@ -1,0 +1,24 @@
+.page-header
+  = link_to new_question_path, :class => 'btn btn-primary' do
+    %span.glyphicon.glyphicon-plus
+    New Question
+  %h1 Listing questions
+
+.table-responsive
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th Content
+        %th Survey
+        %th
+        %th
+        %th
+
+    %tbody
+      - @questions.each do |question|
+        %tr
+          %td= question.content
+          %td= question.survey
+          %td= link_to 'Show', question
+          %td= link_to 'Edit', edit_question_path(question)
+          %td= link_to 'Destroy', question, :data => { confirm: 'Are you sure?' }, :method => :delete

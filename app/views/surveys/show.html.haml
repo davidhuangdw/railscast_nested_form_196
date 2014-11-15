@@ -1,0 +1,21 @@
+.page-header
+  = link_to surveys_path, :class => 'btn btn-default' do
+    %span.glyphicon.glyphicon-list-alt
+    Back
+  = link_to edit_survey_path(@survey), :class => 'btn btn-primary' do
+    %span.glyphicon.glyphicon-pencil
+    Edit
+  %h1 Show survey
+
+%dl.dl-horizontal
+  %dt Name:
+  %dd= @survey.name
+
+%ol
+  - for question in @survey.questions
+    %li
+      = question.content
+      %ul
+        - for answer in question.answers
+          %li
+            = answer.content
