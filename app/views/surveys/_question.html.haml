@@ -1,5 +1,7 @@
-= f.input :content, label:'Question'
-= f.input :_destroy, as: :boolean, label:false, inline_label:'remove question'
-= f.simple_fields_for :answers do |builder|
-  = render 'answer', f:builder
+%fieldset
+  = f.input :content, label:'Question'
+  = f.input :_destroy, as: :boolean, label:false, inline_label:'remove question'
+  = f.simple_fields_for :answers do |builder|
+    = render 'answer', f:builder
+  = link_to_add_fields 'Add answers',f,:answers
 

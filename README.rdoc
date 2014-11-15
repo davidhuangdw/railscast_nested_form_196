@@ -1,28 +1,66 @@
-== README
+        # bug: sometimes just no effect because of turbolink
+        # solution: delegate events to document, see below
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+        # ajax add/remove nested_form
+        # surveys.js
+        $(document).on 'click', 'form .add_fields', (event) ->      # turbolink-compatible(delegate)
+          time = new Date().getTime()
+          regexp = new RegExp($(this).data('id'), 'g')
+          $(this).before($(this).data('fields').replace(regexp, time))  # make unique index
+          event.preventDefault()
 
-Things you may want to cover:
+        $(document).on 'click', 'form .remove_fields', (event) ->
+          $(this).prev('.form-group').find('input[type=hidden]').val('1')   # prev('.form-group') first
+          $(this).closest('fieldset').hide()
+          event.preventDefault()
 
-* Ruby version
+        # application_helper.rb
+          def link_to_add_fields(name, f, association)
+            obj = f.object.send(association).klass.new
+            id = obj.object_id
+            fields = f.simple_fields_for(association, obj, child_index:id) do |builder|
+              render(association.to_s.singularize, f:builder)
+            end
+            link_to name, '#',
+                    class:'add_fields',
+                    data:{id:id, fields:fields.gsub("\n","")}   # put rendered result inside 'data-field'
+          end
+        # view
+            = link_to_add_fields 'Add questions',f,:questions
 
-* System dependencies
+            = f.input :_destroy, as: :hidden
+            = link_to "remove", '#', class:'remove_fields'
 
-* Configuration
+        # model: accepts_nested_attributes_for
+        class Survey
+          has_many :questions
+          accepts_nested_attributes_for :questions, allow_destroy:true, reject_if:
+            ->(attributes){ attributes['content'].blank?}
+        end
+        class Question
+          belongs_to :survey
+          has_many :answers, dependent: :destroy
+          accepts_nested_attributes_for :answers, allow_destroy:true, reject_if:->(a){a['content'].blank?}
+        end
+        # strong params
+        def survey_params
+          params.require(:survey).
+              permit(:name, questions_attributes:[:id, :content, :_destroy,
+                answers_attributes:[:id, :content, :_destroy]])
+        end
+        # view
+        = simple_form_for(@survey) do |f|
+          .form-inputs
+            = f.input :name
+            = f.simple_fields_for :questions do |q|
+              = q.input :content, label:'Question'
+              = q.input :_destroy, as: :boolean, label:false, inline_label:'remove question'
+              = q.simple_fields_for :answers do |a|
+                .form-inline.form-group
+                  = a.input :content, as: :string, label:'Answer: '
+                  = a.input :_destroy, as: :boolean, label:false, inline_label: 'remove'
 
-* Database creation
 
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
-
-
-Please feel free to use a different markup language if you do not plan to run
-<tt>rake doc:app</tt>.
+        # fields_for(<form_scope>, <actual_model_object>) {|sub_fom| ... }
+        - for task in @project.tasks
+          = field_for "project[task_attributes][]", task do |task_form|

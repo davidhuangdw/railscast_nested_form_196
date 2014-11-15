@@ -5,9 +5,11 @@
     = f.input :name
     = f.simple_fields_for :questions do |builder|
       = render 'question', f:builder
+    = link_to_add_fields 'Add questions',f,:questions
 
   .form-actions
     = f.button :submit
+
 
 
 = debug params

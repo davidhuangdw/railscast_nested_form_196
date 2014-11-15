@@ -1,3 +1,5 @@
-.form-inline.form-group
-  = f.input :content, as: :string, label:'Answer: '
-  = f.input :_destroy, as: :boolean, label:false, inline_label: 'remove'
+%fieldset
+  .form-inline.form-group
+    = f.input :content, as: :string, label:'Answer: '
+    = f.input :_destroy, as: :hidden#, label:false, inline_label: 'remove'
+    = link_to "remove", '#', class:'remove_fields'
