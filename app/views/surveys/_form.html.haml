@@ -3,13 +3,8 @@
 
   .form-inputs
     = f.input :name
-    = f.simple_fields_for :questions do |q|
-      = q.input :content, label:'Question'
-      = q.input :_destroy, as: :boolean, label:false, inline_label:'remove question'
-      = q.simple_fields_for :answers do |a|
-        .form-inline.form-group
-          = a.input :content, as: :string, label:'Answer: '
-          = a.input :_destroy, as: :boolean, label:false, inline_label: 'remove'
+    = f.simple_fields_for :questions do |builder|
+      = render 'question', f:builder
 
   .form-actions
     = f.button :submit
